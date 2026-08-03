@@ -1,6 +1,7 @@
 import type { Forecast, Location } from './types'
 
 const GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search'
+const GEO_ID_URL = 'https://geocoding-api.open-meteo.com/v1/get'
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
 
 export async function searchLocations(query: string): Promise<Location[]> {
@@ -18,6 +19,21 @@ export async function searchLocations(query: string): Promise<Location[]> {
     country: r.country,
     admin1: r.admin1,
   }))
+}
+
+export async function getLocationById(id: number): Promise<Location> {
+  const res = await fetch(`${GEO_ID_URL}?id=${id}`)
+  if (!res.ok) throw new Error('Location not found')
+  const d = await res.json()
+  if (typeof d?.id !== 'number') throw new Error('Location not found')
+  return {
+    id: d.id,
+    name: d.name,
+    latitude: d.latitude,
+    longitude: d.longitude,
+    country: d.country,
+    admin1: d.admin1,
+  }
 }
 
 export async function reverseGeocode(lat: number, lon: number): Promise<Location> {
