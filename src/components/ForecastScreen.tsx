@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowUp } from '@phosphor-icons/react'
 import { getForecast } from '../api'
 import { weatherKind } from '../weather'
+import { setWeatherFavicon, restoreFavicon } from '../favicon'
 import type { Forecast as ForecastData, HourPoint, Location } from '../types'
 
 interface Props {
@@ -49,8 +50,16 @@ export default function ForecastScreen({ location, onBack }: Props) {
       .finally(() => alive && setLoading(false))
     return () => {
       alive = false
+      restoreFavicon()
     }
   }, [location])
+
+  useEffect(() => {
+    if (data) {
+      const Icon = weatherKind(data.current.weatherCode).Icon
+      queueMicrotask(() => setWeatherFavicon(Icon))
+    }
+  }, [data])
 
   if (loading) return <div className="screen"><p className="muted">Loading…</p></div>
   if (error || !data) return <div className="screen"><p className="error">{error}</p></div>
