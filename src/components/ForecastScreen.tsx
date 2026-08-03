@@ -141,7 +141,7 @@ export default function ForecastScreen({ location, onBack }: Props) {
 										weight="bold"
 										style={{ transform: `rotate(${h.windDirection + 180}deg)` }}
 									/>
-									{h.windSpeed.toFixed(0)}
+									{h.windSpeed.toFixed(0)} m/s
 								</span>
 							</div>
 						);
