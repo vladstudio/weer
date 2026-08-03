@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MagnifyingGlass, Crosshair, X, MapPin } from '@phosphor-icons/react'
+import { MagnifyingGlass, Crosshair, X } from '@phosphor-icons/react'
 import { searchLocations, reverseGeocode } from '../api'
 import { addRecent, loadRecents, removeRecent } from '../storage'
 import type { Location } from '../types'
@@ -105,13 +105,8 @@ export default function SearchScreen({ onSelect }: Props) {
           {results.map((r) => (
             <li key={r.id}>
               <button className="result" onClick={() => pick(r)}>
-                <MapPin size={18} weight="fill" />
-                <span>
-                  <strong>{r.name}</strong>
-                  <small>
-                    {[r.admin1, r.country].filter(Boolean).join(', ')}
-                  </small>
-                </span>
+                <strong>{r.name}</strong>
+                <small>{[r.admin1, r.country].filter(Boolean).join(', ')}</small>
               </button>
             </li>
           ))}
@@ -119,16 +114,13 @@ export default function SearchScreen({ onSelect }: Props) {
       ) : (
         recents.length > 0 && (
           <div className="recents">
-            <h2>Recent</h2>
+            <h2 className="kicker">Recent</h2>
             <ul className="results">
               {recents.map((r) => (
                 <li key={r.id} className="recent-row">
                   <button className="result" onClick={() => pick(r)}>
-                    <MapPin size={18} weight="fill" />
-                    <span>
-                      <strong>{r.name}</strong>
-                      <small>{[r.admin1, r.country].filter(Boolean).join(', ')}</small>
-                    </span>
+                    <strong>{r.name}</strong>
+                    <small>{[r.admin1, r.country].filter(Boolean).join(', ')}</small>
                   </button>
                   <button className="delete" onClick={() => remove(r.id)} aria-label="Remove">
                     <X size={16} />
