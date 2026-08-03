@@ -5,7 +5,7 @@ import { addRecent, loadRecents, removeRecent } from '../storage'
 import type { Location } from '../types'
 
 interface Props {
-  onSelect: (loc: Location) => void
+  onSelect: (id: number) => void
 }
 
 export default function SearchScreen({ onSelect }: Props) {
@@ -42,7 +42,7 @@ export default function SearchScreen({ onSelect }: Props) {
     setRecents(addRecent(loc))
     setQuery('')
     setResults([])
-    onSelect(loc)
+    onSelect(loc.id)
   }
 
   async function findMe() {
