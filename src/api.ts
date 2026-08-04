@@ -59,7 +59,8 @@ export async function getForecast(loc: Location): Promise<Forecast> {
     longitude: String(loc.longitude),
     current: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation,is_day',
     hourly: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation,is_day',
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,uv_index_max',
+    daily:
+      'weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,uv_index_max',
     timezone: 'auto',
     forecast_days: '10',
     wind_speed_unit: 'ms',

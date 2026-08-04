@@ -11,8 +11,7 @@ export default function App() {
   const [locId, setLocId] = useQueryState('loc', parseAsInteger)
   const [fetched, setFetched] = useState<Location | null>(null)
 
-  const cached =
-    locId != null ? (loadRecents().find((l) => l.id === locId) ?? null) : null
+  const cached = locId != null ? (loadRecents().find((l) => l.id === locId) ?? null) : null
   const loc = cached ?? fetched
 
   useEffect(() => {
