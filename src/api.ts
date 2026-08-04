@@ -57,9 +57,9 @@ export async function getForecast(loc: Location): Promise<Forecast> {
   const params = new URLSearchParams({
     latitude: String(loc.latitude),
     longitude: String(loc.longitude),
-    current: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m',
-    hourly: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m',
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max',
+    current: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation,is_day',
+    hourly: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation,is_day',
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,uv_index_max',
     timezone: 'auto',
     forecast_days: '10',
     wind_speed_unit: 'ms',
@@ -75,6 +75,8 @@ export async function getForecast(loc: Location): Promise<Forecast> {
       weatherCode: d.current.weather_code,
       windSpeed: d.current.wind_speed_10m,
       windDirection: d.current.wind_direction_10m,
+      precipitation: d.current.precipitation,
+      isDay: d.current.is_day,
     },
     hourly: d.hourly.time.map((t: string, i: number) => ({
       time: t,
@@ -82,6 +84,8 @@ export async function getForecast(loc: Location): Promise<Forecast> {
       weatherCode: d.hourly.weather_code[i],
       windSpeed: d.hourly.wind_speed_10m[i],
       windDirection: d.hourly.wind_direction_10m[i],
+      precipitation: d.hourly.precipitation[i],
+      isDay: d.hourly.is_day[i],
     })),
     daily: d.daily.time.map((t: string, i: number) => ({
       date: t,
@@ -89,6 +93,8 @@ export async function getForecast(loc: Location): Promise<Forecast> {
       tempMax: d.daily.temperature_2m_max[i],
       tempMin: d.daily.temperature_2m_min[i],
       windSpeedMax: d.daily.wind_speed_10m_max[i],
+      precipitationSum: d.daily.precipitation_sum[i],
+      uvIndexMax: d.daily.uv_index_max[i],
     })),
   }
 }

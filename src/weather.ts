@@ -1,6 +1,9 @@
 import {
   Sun,
+  Moon,
+  MoonStars,
   CloudSun,
+  CloudMoon,
   Cloud,
   CloudFog,
   CloudRain,
@@ -49,6 +52,21 @@ const MAP: Record<number, WeatherKind> = {
 
 const FALLBACK: WeatherKind = { Icon: Cloud, label: 'Unknown' }
 
-export function weatherKind(code: number): WeatherKind {
+// Snow WMO codes → snow icon; everything else with precip → rain icon.
+const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86])
+
+// Night variants for clear skies (code 0/1/2).
+const NIGHT: Record<number, WeatherKind> = {
+  0: { Icon: Moon, label: 'Clear' },
+  1: { Icon: MoonStars, label: 'Mainly clear' },
+  2: { Icon: CloudMoon, label: 'Partly cloudy' },
+}
+
+export function weatherKind(code: number, isDay: number = 1): WeatherKind {
+  if (!isDay && NIGHT[code]) return NIGHT[code]
   return MAP[code] ?? FALLBACK
+}
+
+export function precipIcon(code: number): Icon {
+  return SNOW_CODES.has(code) ? CloudSnow : CloudRain
 }

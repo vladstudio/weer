@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowUp } from "@phosphor-icons/react";
+import { ArrowLeft, Wind, Radioactive } from "@phosphor-icons/react";
 import { getForecast } from "../api";
-import { weatherKind } from "../weather";
+import { weatherKind, precipIcon } from "../weather";
 import { setWeatherFavicon, restoreFavicon } from "../favicon";
 import type { Forecast as ForecastData, HourPoint, Location } from "../types";
 
@@ -10,7 +10,7 @@ interface Props {
 	onBack: () => void;
 }
 
-const HOURS = [4, 8, 12, 16, 20];
+const HOURS = [4, 8, 12, 16, 20, 24];
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -30,6 +30,22 @@ function tempColor(t: number): string {
 	const [a, b] = [TEMP_STOPS[i], TEMP_STOPS[i + 1]];
 	const c = a.map((v, k) => Math.round(v + (b[k] - v) * f));
 	return `rgb(${c[0]} ${c[1]} ${c[2]})`;
+}
+
+// Compact mm string: "0.3mm", "5mm", "12mm".
+function mm(v: number): string {
+	return `${v < 1 ? v.toFixed(1) : Math.round(v)}mm`;
+}
+
+// UV Index is an absolute WHO scale — color signals the category:
+// 0-2 low (green), 3-5 moderate (amber), 6-7 high (orange),
+// 8-10 very high (red), 11+ extreme (purple).
+function uvColor(uv: number): string {
+	if (uv < 3) return "#3fa34d";
+	if (uv < 6) return "#e0a32e";
+	if (uv < 8) return "#e07a1e";
+	if (uv < 11) return "#d4453b";
+	return "#7b2cf0";
 }
 
 export default function ForecastScreen({ location, onBack }: Props) {
@@ -54,7 +70,7 @@ export default function ForecastScreen({ location, onBack }: Props) {
 
 	useEffect(() => {
 		if (data) {
-			const Icon = weatherKind(data.current.weatherCode).Icon;
+			const Icon = weatherKind(data.current.weatherCode, data.current.isDay).Icon;
 			queueMicrotask(() => setWeatherFavicon(Icon));
 		}
 	}, [data]);
@@ -87,9 +103,9 @@ export default function ForecastScreen({ location, onBack }: Props) {
 	const weekMax = Math.max(...daily.map((d) => d.tempMax));
 	const weekSpan = weekMax - weekMin || 1;
 
-	const nowKind = weatherKind(current.weatherCode);
+	const nowKind = weatherKind(current.weatherCode, current.isDay);
 	const NowIcon = nowKind.Icon;
-	const nowArrow = current.windDirection + 180;
+	const NowPrecip = precipIcon(current.weatherCode);
 
 	return (
 		<div className="screen forecast">
@@ -113,20 +129,22 @@ export default function ForecastScreen({ location, onBack }: Props) {
 					<span className="sep" aria-hidden>
 						·
 					</span>
-					<ArrowUp
-						size={13}
-						weight="bold"
-						style={{ transform: `rotate(${nowArrow}deg)` }}
-					/>
+					<Wind size={16} aria-hidden />
 					<span>{current.windSpeed.toFixed(0)} m/s</span>
+					<span className="sep" aria-hidden>
+						·
+					</span>
+					<NowPrecip size={16} aria-hidden />
+					<span>{mm(current.precipitation)}</span>
 				</div>
 			</section>
 
 			<section className="hours">
 				<div className="hour-grid">
 					{hourCards.map((h) => {
-						const kind = weatherKind(h.weatherCode);
+						const kind = weatherKind(h.weatherCode, h.isDay);
 						const HIcon = kind.Icon;
+						const PIcon = precipIcon(h.weatherCode);
 						const hh = new Date(h.time).getHours();
 						return (
 							<div className="hour" key={h.time}>
@@ -136,12 +154,12 @@ export default function ForecastScreen({ location, onBack }: Props) {
 								<HIcon size={22} aria-label={kind.label} />
 								<span className="hour-temp">{Math.round(h.temperature)}°</span>
 								<span className="hour-wind">
-									<ArrowUp
-										size={11}
-										weight="bold"
-										style={{ transform: `rotate(${h.windDirection + 180}deg)` }}
-									/>
+									<Wind size={11} aria-hidden />
 									{h.windSpeed.toFixed(0)} m/s
+								</span>
+								<span className="hour-precip">
+									<PIcon size={11} aria-hidden />
+									{mm(h.precipitation)}
 								</span>
 							</div>
 						);
@@ -156,6 +174,7 @@ export default function ForecastScreen({ location, onBack }: Props) {
 					const monthday = `${MONTHS[dt.getMonth()]} ${dt.getDate()}`;
 					const kind = weatherKind(d.weatherCode);
 					const DIcon = kind.Icon;
+					const DPre = precipIcon(d.weatherCode);
 					const left = ((d.tempMin - weekMin) / weekSpan) * 100;
 					const width = Math.max(4, ((d.tempMax - d.tempMin) / weekSpan) * 100);
 					return (
@@ -177,7 +196,18 @@ export default function ForecastScreen({ location, onBack }: Props) {
 								/>
 							</span>
 							<span className="day-max">{Math.round(d.tempMax)}°</span>
-							<span className="day-wind">{d.windSpeedMax.toFixed(0)} m/s</span>
+							<span className="day-precip">
+								<DPre size={12} aria-hidden />
+								{mm(d.precipitationSum)}
+							</span>
+							<span className="day-uv" style={{ color: uvColor(d.uvIndexMax) }}>
+								<Radioactive size={12} aria-hidden />
+								{d.uvIndexMax.toFixed(1)}
+							</span>
+							<span className="day-wind">
+								<Wind size={12} aria-hidden />
+								{d.windSpeedMax.toFixed(0)} m/s
+							</span>
 						</div>
 					);
 				})}

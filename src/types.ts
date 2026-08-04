@@ -13,6 +13,8 @@ export interface CurrentWeather {
   weatherCode: number
   windSpeed: number
   windDirection: number
+  precipitation: number
+  isDay: number
 }
 
 export interface HourPoint {
@@ -21,6 +23,8 @@ export interface HourPoint {
   weatherCode: number
   windSpeed: number
   windDirection: number
+  precipitation: number
+  isDay: number
 }
 
 export interface DayPoint {
@@ -29,6 +33,8 @@ export interface DayPoint {
   tempMax: number
   tempMin: number
   windSpeedMax: number
+  precipitationSum: number
+  uvIndexMax: number
 }
 
 export interface Forecast {
