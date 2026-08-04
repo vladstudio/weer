@@ -109,35 +109,41 @@ export default function ForecastScreen({ location, onBack }: Props) {
 
 	return (
 		<div className="screen forecast">
-			<header>
-				<button className="back" onClick={onBack} aria-label="Back">
-					<ArrowLeft size={20} />
-				</button>
-				<span className="loc-name">
-					{location.name}
-					<small>
-						{[location.admin1, location.country].filter(Boolean).join(", ")}
-					</small>
-				</span>
-			</header>
+			<div className="now-row">
+				<header>
+					<button className="back" onClick={onBack} aria-label="Back">
+						<ArrowLeft size={20} />
+					</button>
+					<span className="loc-name">
+						{location.name}
+						<small>
+							{[location.admin1, location.country].filter(Boolean).join(", ")}
+						</small>
+					</span>
+				</header>
 
-			<section className="now">
-				<span className="now-temp">{Math.round(current.temperature)}°</span>
-				<div className="now-meta">
-					<NowIcon size={20} aria-hidden />
-					<span>{nowKind.label}</span>
-					<span className="sep" aria-hidden>
-						·
-					</span>
-					<Wind size={16} aria-hidden />
-					<span>{current.windSpeed.toFixed(0)} m/s</span>
-					<span className="sep" aria-hidden>
-						·
-					</span>
-					<NowPrecip size={16} aria-hidden />
-					<span>{mm(current.precipitation)}</span>
-				</div>
-			</section>
+				<section className="now">
+					<span className="now-temp">{Math.round(current.temperature)}°</span>
+					<div className="now-meta">
+						<NowIcon size={20} aria-hidden />
+						<span>{nowKind.label}</span>
+						<span className="sep" aria-hidden>
+							·
+						</span>
+						<Wind size={16} aria-hidden />
+						<span>{current.windSpeed.toFixed(0)} m/s</span>
+						{current.precipitation > 0 && (
+							<>
+								<span className="sep" aria-hidden>
+									·
+								</span>
+								<NowPrecip size={16} aria-hidden />
+								<span>{mm(current.precipitation)}</span>
+							</>
+						)}
+					</div>
+				</section>
+			</div>
 
 			<section className="hours">
 				<div className="hour-grid">
@@ -157,10 +163,12 @@ export default function ForecastScreen({ location, onBack }: Props) {
 									<Wind size={11} aria-hidden />
 									{h.windSpeed.toFixed(0)} m/s
 								</span>
-								<span className="hour-precip">
-									<PIcon size={11} aria-hidden />
-									{mm(h.precipitation)}
-								</span>
+								{h.precipitation > 0 && (
+									<span className="hour-precip">
+										<PIcon size={11} aria-hidden />
+										{mm(h.precipitation)}
+									</span>
+								)}
 							</div>
 						);
 					})}
@@ -197,8 +205,12 @@ export default function ForecastScreen({ location, onBack }: Props) {
 							</span>
 							<span className="day-max">{Math.round(d.tempMax)}°</span>
 							<span className="day-precip">
-								<DPre size={12} aria-hidden />
-								{mm(d.precipitationSum)}
+								{d.precipitationSum > 0 && (
+									<>
+										<DPre size={12} aria-hidden />
+										{mm(d.precipitationSum)}
+									</>
+								)}
 							</span>
 							<span className="day-uv" style={{ color: uvColor(d.uvIndexMax) }}>
 								<Radioactive size={12} aria-hidden />
