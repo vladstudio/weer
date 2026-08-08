@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+<div align="center">
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+<img src="public/favicon.svg" width="96" height="96" alt="weer logo" />
 
-Currently, two official plugins are available:
+# weer
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+A minimal weather app — search any place, get a 10-day forecast.
 
-## React Compiler
+[weer.vlad.studio](https://weer.vlad.studio)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+</div>
 
-## Expanding the Oxlint configuration
+## Features
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- **Search** any location worldwide (Open-Meteo geocoding)
+- **Current conditions** — temperature, wind, precipitation, day/night
+- **Hourly + 10-day forecast** — temp, weather, wind, rain, UV index
+- **Recents** — last 10 locations, stored in `localStorage`
+- **Shareable URLs** — location lives in the query string (`?loc=5128581`)
+- **PWA-ready** — manifest + icons, installable
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Stack
+
+- [React 19](https://react.dev) + [Vite](https://vite.dev) + TypeScript
+- [Open-Meteo](https://open-meteo.com) — free weather + geocoding API, no key needed
+- [nuqs](https://nuqs.47ng.com) — URL query state
+- [Phosphor Icons](https://phosphoricons.com)
+
+## Development
+
+```bash
+bun install
+bun run dev      # start dev server
+bun run build    # type-check + production build
+bun run lint     # oxlint
+bun run fmt      # oxfmt
 ```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
