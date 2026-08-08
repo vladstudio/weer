@@ -262,6 +262,8 @@ button {
   justify-content: flex-end;
   gap: 3px;
 }
+.day-wind svg, .day-precip svg, .day-uv svg { flex: 0 0 auto; }
+.day-precip { justify-content: flex-start; text-align: left; }
 
 @media (max-width: 420px) {
   .day-row { grid-template-columns: 56px 28px 36px 1fr 36px 40px; }

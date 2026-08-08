@@ -48,6 +48,14 @@ function uvColor(uv: number): string {
   return '#7b2cf0'
 }
 
+// More precipitation shifts from warm blue-gray to saturated warm blue.
+function precipColor(mm: number): string {
+  const x = Math.min(1, Math.max(0, mm / 15))
+  const [r1, g1, b1] = [155, 183, 194]
+  const [r2, g2, b2] = [36, 103, 169]
+  return `rgb(${Math.round(r1 + (r2 - r1) * x)} ${Math.round(g1 + (g2 - g1) * x)} ${Math.round(b1 + (b2 - b1) * x)})`
+}
+
 export default function ForecastScreen({ location, onBack }: Props) {
   const [data, setData] = useState<ForecastData | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -196,7 +204,12 @@ export default function ForecastScreen({ location, onBack }: Props) {
                 />
               </span>
               <span className="day-max">{Math.round(d.tempMax)}°</span>
-              <span className="day-precip">
+              <span
+                className="day-precip"
+                style={
+                  d.precipitationSum > 0 ? { color: precipColor(d.precipitationSum) } : undefined
+                }
+              >
                 {d.precipitationSum > 0 && (
                   <>
                     <DPre size={12} aria-hidden />
