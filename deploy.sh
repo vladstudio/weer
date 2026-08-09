@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-# Build weer and deploy to weer.vlad.studio.
-# Server layout: /srv/weer is served by Caddy (see /etc/caddy/Caddyfile).
+# /srv/weer/current is served by Caddy (see /etc/caddy/Caddyfile).
 set -euo pipefail
 cd "$(dirname "$0")"
-
-echo "▸ build"
-bun run build
-
-echo "▸ deploy"
-rsync -avz --delete --human-readable dist/ vlad@77.42.92.64:/srv/weer/
-
-echo "✓ https://weer.vlad.studio"
+export SITE=weer
+export TYPE=static
+export BUILD="bun run build"
+export BUILD_DIR=dist
+exec ../_deploy/deploy.sh
