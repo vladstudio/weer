@@ -4,6 +4,7 @@ export interface Location {
   latitude: number
   longitude: number
   country?: string
+  countryCode?: string
   admin1?: string
 }
 

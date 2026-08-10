@@ -17,6 +17,7 @@ export async function searchLocations(query: string): Promise<Location[]> {
     latitude: r.latitude,
     longitude: r.longitude,
     country: r.country,
+    countryCode: r.country_code,
     admin1: r.admin1,
   }))
 }
@@ -32,6 +33,7 @@ export async function getLocationById(id: number): Promise<Location> {
     latitude: d.latitude,
     longitude: d.longitude,
     country: d.country,
+    countryCode: d.country_code,
     admin1: d.admin1,
   }
 }
@@ -49,6 +51,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
     latitude: lat,
     longitude: lon,
     country: d.countryName,
+    countryCode: d.countryCode,
     admin1: d.principalSubdivision,
   }
 }

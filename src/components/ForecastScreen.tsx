@@ -3,6 +3,7 @@ import { ArrowLeft, Wind, Radioactive } from '@phosphor-icons/react'
 import { getForecast } from '../api'
 import { weatherKind, precipIcon } from '../weather'
 import { setWeatherFavicon, restoreFavicon } from '../favicon'
+import CountryMap from './CountryMap'
 import type { Forecast as ForecastData, HourPoint, Location } from '../types'
 
 interface Props {
@@ -114,15 +115,18 @@ export default function ForecastScreen({ location, onBack }: Props) {
   return (
     <div className="screen forecast">
       <div className="now-row">
-        <header>
-          <button className="back" onClick={onBack} aria-label="Back">
-            <ArrowLeft size={20} />
-          </button>
-          <span className="loc-name">
-            {location.name}
-            <small>{[location.admin1, location.country].filter(Boolean).join(', ')}</small>
-          </span>
-        </header>
+        <div className="loc-col">
+          <header>
+            <button className="back" onClick={onBack} aria-label="Back">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="loc-name">
+              {location.name}
+              <small>{[location.admin1, location.country].filter(Boolean).join(', ')}</small>
+            </span>
+          </header>
+          <CountryMap location={location} />
+        </div>
 
         <section className="now">
           <span className="now-temp">{Math.round(current.temperature)}°</span>
