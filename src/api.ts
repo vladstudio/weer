@@ -3,7 +3,7 @@ import type { Forecast, Location } from './types'
 const GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 const GEO_ID_URL = 'https://geocoding-api.open-meteo.com/v1/get'
 const FORECAST_URL = 'https://api.pirateweather.net/forecast'
-const PW_KEY = import.meta.env.VITE_PW_KEY ?? '***REMOVED***'
+const PW_KEY = import.meta.env.VITE_PW_KEY
 
 // Pirate Weather uses Dark Sky-style string icons; the rest of the app speaks
 // WMO weather codes. Map the strings back to WMO codes so weather.ts is reused.
@@ -106,6 +106,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
 }
 
 export async function getForecast(loc: Location): Promise<Forecast> {
+  if (!PW_KEY) throw new Error('VITE_PW_KEY is not set')
   const url = `${FORECAST_URL}/${PW_KEY}/${loc.latitude},${loc.longitude}?units=si&extend=hourly`
   const res = await fetch(url)
   if (!res.ok) throw new Error('Forecast failed')
