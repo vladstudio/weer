@@ -143,10 +143,17 @@ export default function ForecastScreen({ location, onBack }: Props) {
                 <span className="sep" aria-hidden>
                   ·
                 </span>
-                <NowPrecip size={16} aria-hidden />
-                <span>{mm(current.precipitation)}</span>
+                <span style={{ color: precipColor(current.precipitation) }}>
+                  <NowPrecip size={16} aria-hidden />
+                  {mm(current.precipitation)}
+                </span>
               </>
             )}
+            <span className="sep" aria-hidden>
+              ·
+            </span>
+            <Radioactive size={16} aria-hidden />
+            <span style={{ color: uvColor(current.uvIndex) }}>{current.uvIndex.toFixed(1)}</span>
           </div>
         </section>
       </div>
@@ -168,9 +175,15 @@ export default function ForecastScreen({ location, onBack }: Props) {
                   {h.windSpeed.toFixed(0)} m/s
                 </span>
                 {h.precipitation > 0 && (
-                  <span className="hour-precip">
+                  <span className="hour-precip" style={{ color: precipColor(h.precipitation) }}>
                     <PIcon size={11} aria-hidden />
                     {mm(h.precipitation)}
+                  </span>
+                )}
+                {h.uvIndex > 0 && (
+                  <span className="hour-uv" style={{ color: uvColor(h.uvIndex) }}>
+                    <Radioactive size={11} aria-hidden />
+                    {h.uvIndex.toFixed(1)}
                   </span>
                 )}
               </div>

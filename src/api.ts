@@ -2,7 +2,56 @@ import type { Forecast, Location } from './types'
 
 const GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 const GEO_ID_URL = 'https://geocoding-api.open-meteo.com/v1/get'
-const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
+const FORECAST_URL = 'https://api.pirateweather.net/forecast'
+const PW_KEY = import.meta.env.VITE_PW_KEY ?? '***REMOVED***'
+
+// Pirate Weather uses Dark Sky-style string icons; the rest of the app speaks
+// WMO weather codes. Map the strings back to WMO codes so weather.ts is reused.
+const ICON_TO_WMO: Record<string, number> = {
+  'clear-day': 0,
+  'clear-night': 0,
+  wind: 0,
+  'partly-cloudy-day': 2,
+  'partly-cloudy-night': 2,
+  cloudy: 3,
+  fog: 45,
+  rain: 63,
+  sleet: 66,
+  snow: 73,
+  hail: 67,
+  thunderstorm: 95,
+  tornado: 95,
+}
+
+function wmo(icon: string): number {
+  return ICON_TO_WMO[icon] ?? 3
+}
+
+function isDayFromIcon(icon: string): number {
+  return icon.endsWith('-night') ? 0 : 1
+}
+
+// Pirate Weather returns unix seconds (UTC). Format as a naive wall-clock
+// string in the location's timezone so new Date(...).getHours() etc. reflect
+// local time at the place, not the browser's timezone.
+function localISO(unixSec: number, tz: string): string {
+  const f = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+  const p = Object.fromEntries(f.formatToParts(new Date(unixSec * 1000)).map((x) => [x.type, x.value]))
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`
+}
+
+function localDate(unixSec: number, tz: string): string {
+  return localISO(unixSec, tz).slice(0, 10)
+}
 
 export async function searchLocations(query: string): Promise<Location[]> {
   if (query.trim().length < 2) return []
@@ -57,48 +106,46 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
 }
 
 export async function getForecast(loc: Location): Promise<Forecast> {
-  const params = new URLSearchParams({
-    latitude: String(loc.latitude),
-    longitude: String(loc.longitude),
-    current: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation,is_day',
-    hourly: 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation,is_day',
-    daily:
-      'weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,uv_index_max',
-    timezone: 'auto',
-    forecast_days: '10',
-    wind_speed_unit: 'ms',
-  })
-  const res = await fetch(`${FORECAST_URL}?${params}`)
+  const url = `${FORECAST_URL}/${PW_KEY}/${loc.latitude},${loc.longitude}?units=si&extend=hourly`
+  const res = await fetch(url)
   if (!res.ok) throw new Error('Forecast failed')
   const d = await res.json()
+  const tz: string = d.timezone
+
+  // Sunrise/sunset windows (unix sec) for deriving isDay at each hour.
+  const windows: [number, number][] = (d.daily?.data ?? []).map((x: any) => [x.sunriseTime, x.sunsetTime])
+  const hourIsDay = (t: number) => (windows.some(([sr, ss]) => t >= sr && t < ss) ? 1 : 0)
+
   return {
-    timezone: d.timezone,
+    timezone: tz,
     current: {
-      time: d.current.time,
-      temperature: d.current.temperature_2m,
-      weatherCode: d.current.weather_code,
-      windSpeed: d.current.wind_speed_10m,
-      windDirection: d.current.wind_direction_10m,
-      precipitation: d.current.precipitation,
-      isDay: d.current.is_day,
+      time: localISO(d.currently.time, tz),
+      temperature: d.currently.temperature,
+      weatherCode: wmo(d.currently.icon),
+      windSpeed: d.currently.windSpeed,
+      windDirection: d.currently.windBearing,
+      precipitation: d.currently.precipIntensity,
+      uvIndex: d.currently.uvIndex,
+      isDay: isDayFromIcon(d.currently.icon),
     },
-    hourly: d.hourly.time.map((t: string, i: number) => ({
-      time: t,
-      temperature: d.hourly.temperature_2m[i],
-      weatherCode: d.hourly.weather_code[i],
-      windSpeed: d.hourly.wind_speed_10m[i],
-      windDirection: d.hourly.wind_direction_10m[i],
-      precipitation: d.hourly.precipitation[i],
-      isDay: d.hourly.is_day[i],
+    hourly: (d.hourly?.data ?? []).map((h: any) => ({
+      time: localISO(h.time, tz),
+      temperature: h.temperature,
+      weatherCode: wmo(h.icon),
+      windSpeed: h.windSpeed,
+      windDirection: h.windBearing,
+      precipitation: h.precipIntensity,
+      uvIndex: h.uvIndex,
+      isDay: hourIsDay(h.time),
     })),
-    daily: d.daily.time.map((t: string, i: number) => ({
-      date: t,
-      weatherCode: d.daily.weather_code[i],
-      tempMax: d.daily.temperature_2m_max[i],
-      tempMin: d.daily.temperature_2m_min[i],
-      windSpeedMax: d.daily.wind_speed_10m_max[i],
-      precipitationSum: d.daily.precipitation_sum[i],
-      uvIndexMax: d.daily.uv_index_max[i],
+    daily: (d.daily?.data ?? []).map((x: any) => ({
+      date: localDate(x.time, tz),
+      weatherCode: wmo(x.icon),
+      tempMax: x.temperatureMax,
+      tempMin: x.temperatureMin,
+      windSpeedMax: x.windSpeed,
+      precipitationSum: (x.precipIntensity ?? 0) * 24,
+      uvIndexMax: x.uvIndex,
     })),
   }
 }

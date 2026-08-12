@@ -15,6 +15,7 @@ export interface CurrentWeather {
   windSpeed: number
   windDirection: number
   precipitation: number
+  uvIndex: number
   isDay: number
 }
 
@@ -25,6 +26,7 @@ export interface HourPoint {
   windSpeed: number
   windDirection: number
   precipitation: number
+  uvIndex: number
   isDay: number
 }
 

@@ -216,7 +216,7 @@ button {
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
-.hour-wind, .hour-precip {
+.hour-wind, .hour-precip, .hour-uv {
   display: flex;
   align-items: center;
   gap: 3px;
